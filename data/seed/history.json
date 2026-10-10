@@ -1,0 +1,41 @@
+[
+  {
+    "id": "seed-h1",
+    "type": "DATES_CHANGED",
+    "projectId": "P02",
+    "payload": {
+      "oldStart": "2026-10-20",
+      "oldEnd": "2026-11-05",
+      "newStart": "2026-11-03",
+      "newEnd": "2026-11-20",
+      "reason": "Waiting for traffic police permission to close one lane."
+    },
+    "createdAt": "2026-09-10T10:30:00.000Z"
+  },
+  {
+    "id": "seed-h2",
+    "type": "DATES_CHANGED",
+    "projectId": "P03",
+    "payload": {
+      "oldStart": "2026-09-01",
+      "oldEnd": "2026-09-20",
+      "newStart": "2026-09-01",
+      "newEnd": "2026-10-05",
+      "reason": "Monsoon rain flooded the trench; work paused for 12 days."
+    },
+    "createdAt": "2026-09-18T09:00:00.000Z"
+  },
+  {
+    "id": "seed-h3",
+    "type": "DATES_CHANGED",
+    "projectId": "P07",
+    "payload": {
+      "oldStart": "2026-09-22",
+      "oldEnd": "2026-10-20",
+      "newStart": "2026-10-01",
+      "newEnd": "2026-10-30",
+      "reason": "Cable delivery from the supplier arrived late."
+    },
+    "createdAt": "2026-09-21T12:15:00.000Z"
+  }
+]

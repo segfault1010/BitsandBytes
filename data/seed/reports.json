@@ -1,0 +1,62 @@
+[
+  {
+    "id": "seed-r1",
+    "type": "REPORT_ADDED",
+    "projectId": "P03",
+    "payload": {
+      "category": "NO_WORK_SEEN",
+      "description": "No workers at the drain site for the last four days."
+    },
+    "createdAt": "2026-10-06T08:20:00.000Z"
+  },
+  {
+    "id": "seed-r2",
+    "type": "REPORT_ADDED",
+    "projectId": "P03",
+    "payload": {
+      "category": "HAZARD",
+      "description": "Open trench with no barricade or lights at night near the bus stop."
+    },
+    "createdAt": "2026-10-08T19:45:00.000Z"
+  },
+  {
+    "id": "seed-r3",
+    "type": "REPORT_ADDED",
+    "projectId": "P01",
+    "payload": {
+      "category": "POOR_QUALITY",
+      "description": "The new surface already has a dip near the school gate."
+    },
+    "createdAt": "2026-09-02T07:10:00.000Z"
+  },
+  {
+    "id": "seed-r4",
+    "type": "REPORT_ADDED",
+    "projectId": "P07",
+    "payload": {
+      "category": "TRAFFIC",
+      "description": "One lane closed during morning peak hours; long queues at the market junction."
+    },
+    "createdAt": "2026-10-05T04:30:00.000Z"
+  },
+  {
+    "id": "seed-r5",
+    "type": "REPORT_ADDED",
+    "projectId": "P07",
+    "payload": {
+      "category": "OTHER",
+      "description": "Dug soil is piled on the footpath, so pedestrians walk on the road."
+    },
+    "createdAt": "2026-10-07T11:00:00.000Z"
+  },
+  {
+    "id": "seed-r6",
+    "type": "REPORT_ADDED",
+    "projectId": "P12",
+    "payload": {
+      "category": "POOR_QUALITY",
+      "description": "Road was not properly restored after the valve work; the patch is sinking."
+    },
+    "createdAt": "2026-08-14T06:00:00.000Z"
+  }
+]

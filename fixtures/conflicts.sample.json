@@ -1,0 +1,88 @@
+{
+  "conflicts": [
+    {
+      "id": "CONCURRENT_WORKS:P04:P05",
+      "rule": "CONCURRENT_WORKS",
+      "kind": "CONFLICT",
+      "severity": "HIGH",
+      "confidence": "HIGH",
+      "projectIds": ["P04", "P05"],
+      "roadId": "R2",
+      "overlapM": { "fromM": 600, "toM": 900, "lengthM": 300 },
+      "overlapDates": { "start": "2026-10-17", "end": "2026-10-20", "days": 4 },
+      "explanation": "Road surface maintenance (P04, Roads Dept, 12–20 Oct) and Telecom duct laying (P05, Telecom, 17–25 Oct) both cover Station Rd 600–900 m (300 m). Their dates overlap for 4 days (17–20 Oct). Possible coordination conflict, flagged for review; not a finding of fault.",
+      "suggestedAction": "Sequence the works: finish the excavation before resurfacing starts, so the new surface is not cut.",
+      "caveats": [],
+      "review": null
+    },
+    {
+      "id": "RESURFACE_PROTECTION:P01:P02",
+      "rule": "RESURFACE_PROTECTION",
+      "kind": "CONFLICT",
+      "severity": "HIGH",
+      "confidence": "HIGH",
+      "projectIds": ["P01", "P02"],
+      "roadId": "R1",
+      "overlapM": { "fromM": 800, "toM": 1200, "lengthM": 400 },
+      "gapDays": 75,
+      "explanation": "Road resurfacing (P01, Roads Dept, 1–20 Aug) ends on 20 Aug. Water main replacement (P02, Water Board, 3–20 Nov) would dig Lakeview Rd 800–1200 m (400 m) of that new surface 75 days later, inside the 365-day protection window. Possible coordination conflict, flagged for review; not a finding of fault.",
+      "suggestedAction": "Do the excavation before the resurfacing where possible. If it must go ahead, record a justification and confirm who restores the surface.",
+      "caveats": [],
+      "review": null
+    },
+    {
+      "id": "CONCURRENT_WORKS:P07:P08",
+      "rule": "CONCURRENT_WORKS",
+      "kind": "CONFLICT",
+      "severity": "HIGH",
+      "confidence": "MEDIUM",
+      "projectIds": ["P07", "P08"],
+      "roadId": "R3",
+      "overlapM": { "fromM": 750, "toM": 800, "lengthM": 50 },
+      "overlapDates": { "start": "2026-10-20", "end": "2026-10-30", "days": 11 },
+      "explanation": "Underground power cable (P07, Power Utility, 1–30 Oct) and Water service connections (P08, Water Board, 20 Oct–5 Nov) both cover Market St 750–800 m (50 m). Their dates overlap for 11 days (20–30 Oct). Possible coordination conflict, flagged for review; not a finding of fault.",
+      "suggestedAction": "Coordinate the two departments: align to one window so both use one trench and one road closure.",
+      "caveats": ["P07: location is approximate (±100 m tolerance applied)."],
+      "review": null
+    },
+    {
+      "id": "CONCURRENT_WORKS:P10:P11",
+      "rule": "CONCURRENT_WORKS",
+      "kind": "CONFLICT",
+      "severity": "HIGH",
+      "confidence": "MEDIUM",
+      "projectIds": ["P10", "P11"],
+      "roadId": "R4",
+      "overlapM": { "fromM": 300, "toM": 400, "lengthM": 100 },
+      "overlapDates": { "start": "2026-12-01", "end": "2026-12-10", "days": 10 },
+      "explanation": "New storm-water drain (P10, Storm-water Drains, 25 Oct–24 Dec) and Fibre cable laying (P11, Telecom, 1–10 Dec) both cover Temple St 300–400 m (100 m). Their dates overlap for 10 days (1–10 Dec). Possible coordination conflict, flagged for review; not a finding of fault.",
+      "suggestedAction": "Coordinate the two departments: align to one window so both use one trench and one road closure.",
+      "caveats": ["P10: no end date recorded; assumed 60 days (to 24 Dec)."],
+      "review": null
+    },
+    {
+      "id": "REPEAT_EXCAVATION:P05:P06",
+      "rule": "REPEAT_EXCAVATION",
+      "kind": "CONFLICT",
+      "severity": "MEDIUM",
+      "confidence": "HIGH",
+      "projectIds": ["P05", "P06"],
+      "roadId": "R2",
+      "overlapM": { "fromM": 1000, "toM": 1100, "lengthM": 100 },
+      "gapDays": 21,
+      "explanation": "Telecom duct laying (P05, Telecom, 17–25 Oct) and Gas pipeline extension (P06, Gas Utility, 15–30 Nov) both dig Station Rd 1000–1100 m (100 m), 21 days apart, so the same stretch would be opened twice within 90 days. Possible coordination conflict, flagged for review; not a finding of fault.",
+      "suggestedAction": "Combine into one dig: align P06 with P05's window, or share the trench.",
+      "caveats": [],
+      "review": null
+    }
+  ],
+  "unchecked": [
+    { "projectId": "P16", "reason": "No start date recorded, so timing could not be checked." }
+  ],
+  "config": {
+    "protectionDays": 365,
+    "repeatGapDays": 90,
+    "assumedDurationDays": 60,
+    "approxToleranceM": 100
+  }
+}
