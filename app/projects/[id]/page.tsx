@@ -11,13 +11,15 @@ import { HistoryTimeline } from "@/components/HistoryTimeline";
 import { ReportForm } from "@/components/ReportForm";
 import { RescheduleForm } from "@/components/RescheduleForm";
 import { RoadMap } from "@/components/RoadMap";
+import { RoadStrip } from "@/components/RoadStrip";
 import { useRole } from "@/components/RoleToggle";
 import { overlapSegments, projectSegments } from "@/components/segments";
 import { ErrorNote, Loading, OverdueBadge, StatusBadge } from "@/components/ui";
 import { api, ApiRequestError } from "@/lib/api";
 import { formatDate } from "@/lib/dates";
 import { WORK_TYPE_LABEL } from "@/lib/labels";
-import type { ProjectDetail } from "@/lib/types";
+import { AS_OF } from "@/lib/config";
+import type { ProjectDetail, ProjectSummary } from "@/lib/types";
 
 interface LoadError {
   id: string;
@@ -30,7 +32,7 @@ export default function ProjectPage() {
   const role = useRole();
   const [detail, setDetail] = useState<ProjectDetail | null>(null);
   const [error, setError] = useState<LoadError | null>(null);
-  const [titles, setTitles] = useState<Record<string, string>>({});
+  const [register, setRegister] = useState<ProjectSummary[]>([]);
 
   const requestSeq = useRef(0);
 
@@ -58,13 +60,13 @@ export default function ProjectPage() {
     load();
   }, [load]);
 
-  // Titles for the links under each flag. Optional: without them the cards show ids only.
+  // The whole register: titles for the links under each flag, and the other works on this road
+  // for the timeline. Optional: without it the cards show ids and the timeline shows this work.
+  // Refetched with the project (detail changes) so a reschedule shows up in the timeline too.
   useEffect(() => {
-    api.projects().then(
-      (ps) => setTitles(Object.fromEntries(ps.map((p) => [p.id, p.title]))),
-      () => {},
-    );
-  }, []);
+    api.projects().then(setRegister, () => {});
+  }, [detail]);
+  const titles = Object.fromEntries(register.map((p) => [p.id, p.title]));
 
   // Ignore results that belong to a previous id while the new one loads.
   const current = detail?.project.id === id ? detail : null;
@@ -138,6 +140,26 @@ export default function ProjectPage() {
           </div>
         )}
       </div>
+
+      {road && (
+        <Section title="Road timeline">
+          <p className="text-sm text-slate-600">
+            Every dated work on {road.name}: dates across, metres along the road down. Red marks a
+            flagged overlap or gap involving this work; blue marks coordinated works.
+          </p>
+          <RoadStrip
+            road={road}
+            projects={
+              register.some((p) => p.id === project.id)
+                ? register.map((p) => (p.id === project.id ? project : p))
+                : [project]
+            }
+            conflicts={conflicts}
+            asOf={AS_OF}
+            highlightId={project.id}
+          />
+        </Section>
+      )}
 
       <Section title="Coordination flags">
         {conflicts.length === 0 ? (

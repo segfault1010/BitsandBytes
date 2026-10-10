@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { checkProposed, detect, DRAFT_ID, isOverdue } from "./engine";
+import { checkProposed, detect, DRAFT_ID, isOverdue, suggestStart } from "./engine";
 import type { Project, ProjectDraft } from "./types";
 
 let seq = 0;
@@ -230,6 +230,42 @@ describe("checkProposed", () => {
     expect(joined.conflicts.find((c) => c.projectIds.includes(existingA.id))?.kind).toBe(
       "COORDINATED",
     );
+  });
+});
+
+describe("suggestStart", () => {
+  const draftFrom = (p: Project): ProjectDraft => ({ ...p, actualStart: null, actualEnd: null });
+
+  it("returns the proposed start when it is already flag-free", () => {
+    const existing = project({ road: "S1", plannedStart: "2026-10-01", plannedEnd: "2026-10-05" });
+    const draft = draftFrom(
+      project({ road: "S2", plannedStart: "2026-10-03", plannedEnd: "2026-10-04" }),
+    );
+    expect(suggestStart(draft, [existing], "2026-10-01")).toBe("2026-10-03");
+  });
+
+  it("moves past a dig on the same stretch and its 90-day repeat window, keeping the duration", () => {
+    const existing = project({ road: "S3", plannedStart: "2026-10-01", plannedEnd: "2026-10-10" });
+    const draft = draftFrom(
+      project({ road: "S3", plannedStart: "2026-10-05", plannedEnd: "2026-10-07" }),
+    );
+    // Clear only when the gap after 10 Oct exceeds 90 days: 9 Jan 2027 (gap 91).
+    expect(suggestStart(draft, [existing], "2026-10-01")).toBe("2027-01-09");
+  });
+
+  it("never suggests a date before the demo date", () => {
+    const draft = draftFrom(
+      project({ road: "S4", plannedStart: "2026-01-01", plannedEnd: "2026-01-02" }),
+    );
+    expect(suggestStart(draft, [], "2026-10-10")).toBe("2026-10-10");
+  });
+
+  it("returns null when every day in the scan is blocked", () => {
+    const existing = project({ road: "S5", plannedStart: "2026-10-01", plannedEnd: "2026-12-31" });
+    const draft = draftFrom(
+      project({ road: "S5", plannedStart: "2026-10-05", plannedEnd: "2026-10-07" }),
+    );
+    expect(suggestStart(draft, [existing], "2026-10-01", {}, 30)).toBeNull();
   });
 });
 

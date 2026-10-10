@@ -24,16 +24,26 @@ The problem is real in Indian cities, and it is current. In July 2026 a newly as
 
 CivicTrack is one record of planned and ongoing works, used by both departments and residents.
 
-1. **Check before you dig.** A department enters a proposed work. Before it is saved, a deterministic engine checks it against every planned or recent work on the same stretch of road. It explains each flag, and offers to join the other job's window so both can share one trench ("dig once").
+1. **Check before you dig.** A department enters a proposed work. Before it is saved, a deterministic engine checks it against every planned or recent work on the same stretch of road. It explains each flag, offers to join the other job's window so both can share one trench ("dig once"), and suggests the earliest start date with no open flags. Going ahead anyway needs a written justification, which is kept in the public history.
 2. **Re-dig rules.** It flags excavation on a recently resurfaced stretch, and two separate digs close together. These are exactly the "dug up several times" cases.
 3. **Explain when you're late.** Every date change needs a public reason and is kept in the project's history. Overdue works are flagged automatically.
 4. **Residents in the loop.** Anyone can look up their street, see who is responsible and until when, and attach a report (no work seen, hazard, poor quality, traffic) to the specific project.
 
-A flag always means _possible coordination conflict, flagged for review_. It is never a finding of fault.
+A flag always means _possible coordination conflict, flagged for review_. It is never a finding of fault. Officers acknowledge or dismiss flags on the coordination page, with a public note.
+
+**Where to see it:**
+
+- `/`: the register, with a map and filters by road, department and status.
+- `/projects/[id]`: one work, with its map, flags, road timeline, history and report form.
+- `/propose`: the live check (officer view).
+- `/coordination`: every flag in the ward.
+- `/about`: the method, its limits, and the demo reset.
+
+The demo walkthrough is in [`docs/demo-script.md`](docs/demo-script.md).
 
 ## How the engine works
 
-Code: [`lib/engine.ts`](lib/engine.ts). Tests: [`lib/engine.test.ts`](lib/engine.test.ts) and [`lib/seed.test.ts`](lib/seed.test.ts).
+Code: [`lib/engine.ts`](lib/engine.ts). Tests: [`lib/engine.test.ts`](lib/engine.test.ts), [`lib/seed.test.ts`](lib/seed.test.ts) and [`lib/registry.test.ts`](lib/registry.test.ts).
 
 Every work is a **stretch of one road**, measured in metres from the start of the road ("chainage"), plus its dates. For every pair of works on the same road, the engine compares two intervals: metres and days.
 
@@ -49,6 +59,7 @@ Every work is a **stretch of one road**, measured in metres from the start of th
 - **Explanations:** each flag gives the overlap in metres, the overlap dates or the gap in days, a plain-language explanation and a suggested action.
 - **Confidence:** starts at High and drops one level for each caveat (approximate location, tentative dates, assumed end date).
 - **Missing data:** works with no start date are listed as _unchecked_ rather than silently skipped.
+- **Earliest clear start:** `suggestStart` scans forward day by day for up to two years, starting from the proposed start (or the demo date, if that is later). It keeps the proposal's duration and returns the first start with no open flags.
 
 Thresholds live in `DEFAULT_CONFIG`. They are illustrative defaults informed by Chennai's one-year rule; they are not official policy. The engine has no I/O, no clock and no randomness, so the same input always gives the same output.
 
@@ -80,7 +91,7 @@ Thresholds live in `DEFAULT_CONFIG`. They are illustrative defaults informed by 
 | POST   | `/api/projects/:id/reports`                   | Citizen report `{ category, description, name? }`                                                             |
 | POST   | `/api/projects/:id/reschedule`                | New dates plus a required public `reason`                                                                     |
 | GET    | `/api/conflicts`                              | Every flag (with review status) and the unchecked works                                                       |
-| POST   | `/api/conflicts/check`                        | Check a `{ draft }` without saving                                                                            |
+| POST   | `/api/conflicts/check`                        | Check a `{ draft }` without saving; includes `suggestedStart` when flags remain                               |
 | PUT    | `/api/conflicts/:id/review`                   | Acknowledge or dismiss a flag, with a note                                                                    |
 | POST   | `/api/admin/reset`                            | Restore the seed (header `x-reset-token` must match `RESET_TOKEN`)                                            |
 
@@ -91,12 +102,12 @@ Requires Node 20 or newer (developed on Node 24).
 ```bash
 npm ci
 npm run dev        # http://localhost:3000, memory mode
-npm test           # engine, geometry and seed-consistency tests
+npm test           # engine, geometry, read-model and seed-consistency tests
 npm run build      # runs the tests, then the production build
 npm run smoke -- http://localhost:3000   # API smoke test against a running instance
 ```
 
-**Optional database:** copy `.env.example` to `.env.local` and set `DATABASE_URL` to a Neon Postgres connection string. The table is created automatically on first use. On Vercel, add Neon from the Marketplace, which sets `DATABASE_URL`, and set `RESET_TOKEN`.
+**Optional database:** copy `.env.example` to `.env.local` and set `DATABASE_URL` to a Neon Postgres connection string. The table is created automatically on first use. On Vercel, add Neon from the Marketplace, which sets `DATABASE_URL`, and set `RESET_TOKEN`. The token enables **Reset demo data** on `/about`, which restores the seed before a recording.
 
 ## Open-source libraries, APIs and data (disclosure)
 

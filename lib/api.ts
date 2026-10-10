@@ -1,9 +1,9 @@
 // Typed browser client for our own /api routes. Pages and components call only these functions.
 
 import type {
+  CheckResult,
   CivicEvent,
   Conflict,
-  DetectResult,
   MetaResponse,
   Project,
   ProjectDetail,
@@ -73,7 +73,7 @@ export const api = {
 
   /** Live check of a proposed work. Saves nothing. */
   checkDraft: (draft: ProjectDraft) =>
-    request<DetectResult>("/api/conflicts/check", post({ draft })),
+    request<CheckResult>("/api/conflicts/check", post({ draft })),
 
   /** Throws ApiRequestError with code JUSTIFICATION_REQUIRED (status 422) if open flags remain. */
   submitDraft: (draft: ProjectDraft, justification?: string) =>

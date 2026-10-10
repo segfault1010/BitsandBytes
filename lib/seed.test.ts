@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import expected from "@/data/seed/expected-conflicts.json";
 import { AS_OF } from "./config";
 import { isISODate } from "./dates";
-import { checkProposed, detect, isOverdue } from "./engine";
+import { checkProposed, detect, isOverdue, suggestStart } from "./engine";
 import { SEED } from "./seed";
 import { buildState } from "./state";
 import type { ProjectDraft } from "./types";
@@ -93,5 +93,8 @@ describe("seed data", () => {
     ).conflicts;
     expect(joined.find((c) => c.projectIds.includes("P02"))?.kind).toBe("COORDINATED");
     expect(joined.find((c) => c.rule === "RESURFACE_PROTECTION")?.kind).toBe("CONFLICT");
+
+    // Earliest flag-free start: the day after the 365-day protection window ends (20 Aug + 366).
+    expect(suggestStart(draft, SEED.projects, AS_OF, ctx)).toBe("2027-08-21");
   });
 });

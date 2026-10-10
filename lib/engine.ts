@@ -1,7 +1,7 @@
 // The conflict engine: deterministic, explainable coordination checks between public works.
 // Pure functions only: no I/O, no clock, no randomness. Same input, same output, every time.
 
-import { addDays, daysBetween, formatDate, formatRange, toDay } from "./dates";
+import { addDays, daysBetween, formatDate, formatRange, fromDay, toDay } from "./dates";
 import type {
   Conflict,
   ConflictRule,
@@ -275,6 +275,55 @@ export function checkProposed(
         : c;
     });
   return { conflicts, unchecked: result.unchecked.filter((u) => u.projectId === DRAFT_ID) };
+}
+
+/** Flags that still need attention: real conflicts, not coordinated works or emergency info. */
+export function isOpenFlag(c: Conflict): boolean {
+  return c.kind === "CONFLICT" && c.severity !== "INFO";
+}
+
+/**
+ * The earliest start date, on or after both the proposed start and `from` (the demo date), at
+ * which the proposal (same stretch, same duration) raises no open flags. Scans up to `maxDays`
+ * ahead and returns null if every day is blocked. Coordinated links in the draft are respected.
+ */
+export function suggestStart(
+  draft: ProjectDraft,
+  projects: Project[],
+  from: ISODate,
+  ctx: EngineContext = {},
+  maxDays = 730,
+): ISODate | null {
+  if (!draft.plannedStart) return null;
+  const cfg: EngineConfig = { ...DEFAULT_CONFIG, ...ctx.config };
+  const names = namer(ctx);
+  const others = projects.filter(
+    (p) =>
+      p.id !== DRAFT_ID && p.status !== "CANCELLED" && p.location.roadId === draft.location.roadId,
+  );
+  const intervals = new Map(others.map((p) => [p.id, intervalOf(p, cfg)]));
+  const duration = draft.plannedEnd ? daysBetween(draft.plannedStart, draft.plannedEnd) : null;
+  const firstDay = Math.max(toDay(draft.plannedStart), toDay(from));
+
+  for (let offset = 0; offset <= maxDays; offset++) {
+    const start = fromDay(firstDay + offset);
+    const candidate: Project = {
+      ...draft,
+      id: DRAFT_ID,
+      status: "PROPOSED",
+      actualStart: null,
+      actualEnd: null,
+      plannedStart: start,
+      plannedEnd: duration === null ? null : addDays(start, duration),
+    };
+    intervals.set(DRAFT_ID, intervalOf(candidate, cfg));
+    const blocked = others.some((other) => {
+      const c = checkPair(candidate, other, intervals, cfg, names);
+      return c !== null && isOpenFlag(c);
+    });
+    if (!blocked) return start;
+  }
+  return null;
 }
 
 /** Overdue = planned end date has passed (as of the demo date) and the work is not finished. */
