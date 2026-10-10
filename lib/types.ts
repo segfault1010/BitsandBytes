@@ -142,6 +142,12 @@ export interface DetectResult {
   unchecked: UncheckedProject[];
 }
 
+/** A proposal check: its flags, plus the earliest start date with no open flags (if blocked). */
+export interface CheckResult extends DetectResult {
+  /** Null when there are no open flags, or when no flag-free start exists within two years. */
+  suggestedStart: ISODate | null;
+}
+
 export interface EngineConfig {
   /** Days after a resurfacing during which excavation on that stretch is flagged. */
   protectionDays: number;

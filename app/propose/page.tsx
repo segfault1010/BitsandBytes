@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ConflictCard } from "@/components/ConflictCard";
 import { RoadMap } from "@/components/RoadMap";
+import { RoadStrip } from "@/components/RoadStrip";
 import { setRole, useRole } from "@/components/RoleToggle";
 import { overlapSegments, projectSegments } from "@/components/segments";
 import {
@@ -19,9 +20,11 @@ import {
 } from "@/components/ui";
 import { useMeta } from "@/components/useMeta";
 import { api, ApiRequestError } from "@/lib/api";
+import { DEFAULT_CONFIG, DRAFT_ID, intervalOf } from "@/lib/engine";
 import { MAP_COLOR, WORK_TYPE_LABEL } from "@/lib/labels";
 import { isOpenFlag } from "@/lib/registry";
-import type { DetectResult, Project, ProjectDraft, ProjectSummary, WorkType } from "@/lib/types";
+import { addDays, daysBetween, formatDate, isISODate, toDay } from "@/lib/dates";
+import type { CheckResult, Project, ProjectDraft, ProjectSummary, WorkType } from "@/lib/types";
 
 interface FormState {
   title: string;
@@ -74,7 +77,7 @@ const DEMO_EXAMPLE: FormState = {
 /** The latest check response, tagged with the draft it was for. */
 interface Checked {
   key: string;
-  result?: DetectResult;
+  result?: CheckResult;
   error?: string;
 }
 
@@ -85,6 +88,8 @@ function toDraft(f: FormState): ProjectDraft | null {
   const fromM = Number(f.fromM);
   const toM = Number(f.toM);
   if (f.title.trim().length < 3 || !f.departmentId || !f.roadId || !f.plannedStart) return null;
+  // Date inputs accept 5–6 digit years while typing; only check once both dates are real ISO dates.
+  if (!isISODate(f.plannedStart) || (f.plannedEnd && !isISODate(f.plannedEnd))) return null;
   if (f.fromM === "" || f.toM === "" || !Number.isFinite(fromM) || !Number.isFinite(toM))
     return null;
   return {
@@ -170,6 +175,8 @@ export default function ProposePage() {
   const joinWindow = (w: { projectId: string; start: string; end: string }) => {
     // Never move a proposal into the past: start the shared window no earlier than the demo date.
     const start = meta && w.start < meta.asOf ? meta.asOf : w.start;
+    setSaved(null);
+    setSubmitError(null);
     setForm((f) => ({
       ...f,
       plannedStart: start,
@@ -178,6 +185,34 @@ export default function ProposePage() {
         ? f.coordinatedWith
         : [...f.coordinatedWith, w.projectId],
     }));
+  };
+
+  /**
+   * Moves the proposal to the suggested start, keeping its duration. Coordination links to works
+   * whose dates no longer overlap the new window are dropped, so the record stays truthful.
+   */
+  const applySuggestedStart = (start: string) => {
+    setSaved(null);
+    setSubmitError(null);
+    setForm((f) => {
+      const end =
+        f.plannedEnd && f.plannedStart
+          ? addDays(start, daysBetween(f.plannedStart, f.plannedEnd))
+          : f.plannedEnd;
+      const newStart = toDay(start);
+      const newEnd = toDay(end || start);
+      const stillShared = (id: string) => {
+        const other = projects.find((p) => p.id === id);
+        const iv = other && intervalOf(other, meta?.config ?? DEFAULT_CONFIG);
+        return !!iv && toDay(iv.start) <= newEnd && toDay(iv.end) >= newStart;
+      };
+      return {
+        ...f,
+        plannedStart: start,
+        plannedEnd: end,
+        coordinatedWith: f.coordinatedWith.filter(stillShared),
+      };
+    });
   };
 
   async function submit() {
@@ -196,8 +231,16 @@ export default function ProposePage() {
       // The register changed since the last check (e.g. another officer added a work): show the
       // fresh flags so the justification box appears.
       if (e instanceof ApiRequestError && e.code === "JUSTIFICATION_REQUIRED" && draftKey) {
-        const fresh = e.body.conflicts as DetectResult["conflicts"] | undefined;
-        if (fresh) setChecked({ key: draftKey, result: { conflicts: fresh, unchecked: [] } });
+        const fresh = e.body.conflicts as CheckResult["conflicts"] | undefined;
+        if (fresh)
+          setChecked({
+            key: draftKey,
+            result: {
+              conflicts: fresh,
+              unchecked: [],
+              suggestedStart: (e.body.suggestedStart as string | null | undefined) ?? null,
+            },
+          });
       }
       setSubmitError(
         e instanceof ApiRequestError ? e.message : "Could not submit. Please try again.",
@@ -535,7 +578,7 @@ export default function ProposePage() {
             </button>
             {!draft && (
               <span className="text-xs text-slate-500">
-                Fill in title, department, road, metres and start date to check.
+                Fill in title, department, road, metres and a valid start date to check.
               </span>
             )}
           </div>
@@ -543,12 +586,32 @@ export default function ProposePage() {
 
         <div className="space-y-4">
           {road ? (
-            <RoadMap
-              roads={meta.roads}
-              segments={roadSegments}
-              focusRoadIds={[road.id]}
-              height={300}
-            />
+            <>
+              <RoadMap
+                roads={meta.roads}
+                segments={roadSegments}
+                focusRoadIds={[road.id]}
+                height={300}
+              />
+              <RoadStrip
+                road={road}
+                projects={projects.filter((p) => p.location.roadId === road.id)}
+                conflicts={conflicts}
+                asOf={meta.asOf}
+                draft={
+                  draft && draft.location.roadId === road.id
+                    ? {
+                        ...draft,
+                        id: DRAFT_ID,
+                        status: "PROPOSED",
+                        actualStart: null,
+                        actualEnd: null,
+                      }
+                    : null
+                }
+                height={220}
+              />
+            </>
           ) : (
             <div className="flex h-[300px] items-center justify-center rounded-lg border border-dashed border-slate-300 text-sm text-slate-500">
               Choose a road to see it on the map.
@@ -561,6 +624,9 @@ export default function ProposePage() {
             total={conflicts.length}
             hasDraft={!!draft}
           />
+          {status === "done" && openFlags.length > 0 && (
+            <SuggestedStart start={result?.suggestedStart ?? null} onUse={applySuggestedStart} />
+          )}
           {result?.unchecked.map((u) => (
             <p key={u.projectId} className="text-sm text-slate-600">
               {u.reason}
@@ -614,5 +680,34 @@ function CheckSummary({
         openCount > 0 &&
         `${openCount} ${openCount === 1 ? "flag needs" : "flags need"} attention before this work goes ahead.`}
     </p>
+  );
+}
+
+function SuggestedStart({
+  start,
+  onUse,
+}: {
+  start: string | null;
+  onUse: (start: string) => void;
+}) {
+  return (
+    <div className="flex flex-wrap items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm">
+      {start ? (
+        <>
+          <span>
+            Earliest start with no open flags on this stretch:{" "}
+            <strong>{formatDate(start, true)}</strong>
+          </span>
+          <button type="button" className={secondaryButtonClass} onClick={() => onUse(start)}>
+            Use this start date
+          </button>
+        </>
+      ) : (
+        <span className="text-slate-600">
+          No start date in the two years after the proposed start clears every flag here.
+          Coordinate, or record a justification.
+        </span>
+      )}
+    </div>
   );
 }

@@ -28,14 +28,14 @@ export async function POST(request: Request) {
   const justification = validateJustification(body?.justification);
   if (!justification.ok) return apiError(400, "INVALID_JUSTIFICATION", justification.message);
 
-  const { conflicts } = checkDraft(state, draft.value);
+  const { conflicts, suggestedStart } = checkDraft(state, draft.value);
   const open = conflicts.filter(isOpenFlag);
   if (open.length > 0 && !justification.value) {
     return apiError(
       422,
       "JUSTIFICATION_REQUIRED",
       `This work has ${open.length} open coordination flag(s). Add a written justification to submit it.`,
-      { conflicts },
+      { conflicts, suggestedStart },
     );
   }
 

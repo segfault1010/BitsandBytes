@@ -1,8 +1,17 @@
 // Read models built from the current state. Used by the API routes.
 
 import { AS_OF } from "./config";
-import { checkProposed, conflictsFor, detect, isOverdue, type EngineContext } from "./engine";
+import {
+  checkProposed,
+  conflictsFor,
+  detect,
+  isOpenFlag,
+  isOverdue,
+  suggestStart,
+  type EngineContext,
+} from "./engine";
 import type {
+  CheckResult,
   CivicState,
   Conflict,
   DetectResult,
@@ -20,14 +29,18 @@ export function allConflicts(state: CivicState): DetectResult {
   return detect(state.projects, engineContext(state));
 }
 
-export function checkDraft(state: CivicState, draft: ProjectDraft): DetectResult {
-  return checkProposed(draft, state.projects, engineContext(state));
+/** Checks a proposal; when it has open flags, also suggests the earliest flag-free start. */
+export function checkDraft(state: CivicState, draft: ProjectDraft): CheckResult {
+  const ctx = engineContext(state);
+  const result = checkProposed(draft, state.projects, ctx);
+  const blocked = result.conflicts.some(isOpenFlag);
+  return {
+    ...result,
+    suggestedStart: blocked ? suggestStart(draft, state.projects, AS_OF, ctx) : null,
+  };
 }
 
-/** Flags that still need attention: real conflicts, not coordinated or emergency info. */
-export function isOpenFlag(c: Conflict): boolean {
-  return c.kind === "CONFLICT" && c.severity !== "INFO";
-}
+export { isOpenFlag };
 
 export function withReview(state: CivicState, c: Conflict): Conflict & { review: Review | null } {
   return { ...c, review: state.reviews[c.id] ?? null };
