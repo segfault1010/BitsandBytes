@@ -1,0 +1,34 @@
+{
+  "conflicts": [
+    {
+      "id": "CONCURRENT_WORKS:DRAFT:P02",
+      "rule": "CONCURRENT_WORKS",
+      "kind": "CONFLICT",
+      "severity": "HIGH",
+      "confidence": "HIGH",
+      "projectIds": ["DRAFT", "P02"],
+      "roadId": "R1",
+      "overlapM": { "fromM": 800, "toM": 1000, "lengthM": 200 },
+      "overlapDates": { "start": "2026-11-03", "end": "2026-11-05", "days": 3 },
+      "explanation": "Underground power cable (proposed, Power Utility, 25 Oct–5 Nov) and Water main replacement (P02, Water Board, 3–20 Nov) both cover Lakeview Rd 800–1000 m (200 m). Their dates overlap for 3 days (3–5 Nov). Possible coordination conflict, flagged for review; not a finding of fault.",
+      "suggestedAction": "Coordinate the two departments: align to one window so both use one trench and one road closure.",
+      "caveats": [],
+      "joinWindow": { "projectId": "P02", "start": "2026-11-03", "end": "2026-11-20" }
+    },
+    {
+      "id": "RESURFACE_PROTECTION:DRAFT:P01",
+      "rule": "RESURFACE_PROTECTION",
+      "kind": "CONFLICT",
+      "severity": "HIGH",
+      "confidence": "HIGH",
+      "projectIds": ["DRAFT", "P01"],
+      "roadId": "R1",
+      "overlapM": { "fromM": 500, "toM": 1000, "lengthM": 500 },
+      "gapDays": 66,
+      "explanation": "Road resurfacing (P01, Roads Dept, 1–20 Aug) ends on 20 Aug. Underground power cable (proposed, Power Utility, 25 Oct–5 Nov) would dig Lakeview Rd 500–1000 m (500 m) of that new surface 66 days later, inside the 365-day protection window. Possible coordination conflict, flagged for review; not a finding of fault.",
+      "suggestedAction": "Do the excavation before the resurfacing where possible. If it must go ahead, record a justification and confirm who restores the surface.",
+      "caveats": []
+    }
+  ],
+  "unchecked": []
+}

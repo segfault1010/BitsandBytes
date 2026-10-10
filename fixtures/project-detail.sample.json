@@ -1,0 +1,91 @@
+{
+  "project": {
+    "id": "P03",
+    "title": "Storm-water drain repair",
+    "purpose": "Rebuild a collapsed drain section that floods the road every monsoon.",
+    "departmentId": "D-DRAIN",
+    "contractor": "Demo Civil Contractors (fictional)",
+    "contactName": "Assistant engineer (demo)",
+    "contactPhone": "+91 00000 00003",
+    "workType": "EXCAVATION",
+    "status": "IN_PROGRESS",
+    "location": { "roadId": "R1", "fromM": 1600, "toM": 2000 },
+    "plannedStart": "2026-09-01",
+    "plannedEnd": "2026-10-05",
+    "actualStart": "2026-09-01",
+    "actualEnd": null,
+    "locationApproximate": false,
+    "datesTentative": false,
+    "isEmergency": false,
+    "restorationBy": "Storm-water Drains",
+    "coordinatedWith": []
+  },
+  "department": {
+    "id": "D-DRAIN",
+    "name": "Storm-water Drains Department (demo)",
+    "shortName": "Storm-water Drains",
+    "contactEmail": "drains@example.org"
+  },
+  "road": {
+    "id": "R1",
+    "name": "Lakeview Rd",
+    "ward": "Ward 12 (demo)",
+    "coords": [
+      [12.96, 77.58],
+      [12.96, 77.592425],
+      [12.965708, 77.598282]
+    ],
+    "lengthM": 2244
+  },
+  "overdue": { "overdue": true, "daysLate": 5 },
+  "history": [
+    {
+      "id": "seed-h2",
+      "type": "DATES_CHANGED",
+      "projectId": "P03",
+      "payload": {
+        "oldStart": "2026-09-01",
+        "oldEnd": "2026-09-20",
+        "newStart": "2026-09-01",
+        "newEnd": "2026-10-05",
+        "reason": "Monsoon rain flooded the trench; work paused for 12 days."
+      },
+      "createdAt": "2026-09-18T09:00:00.000Z"
+    },
+    {
+      "id": "seed-r1",
+      "type": "REPORT_ADDED",
+      "projectId": "P03",
+      "payload": {
+        "category": "NO_WORK_SEEN",
+        "description": "No workers at the drain site for the last four days."
+      },
+      "createdAt": "2026-10-06T08:20:00.000Z"
+    },
+    {
+      "id": "seed-r2",
+      "type": "REPORT_ADDED",
+      "projectId": "P03",
+      "payload": {
+        "category": "HAZARD",
+        "description": "Open trench with no barricade or lights at night near the bus stop."
+      },
+      "createdAt": "2026-10-08T19:45:00.000Z"
+    }
+  ],
+  "reports": [
+    {
+      "category": "NO_WORK_SEEN",
+      "description": "No workers at the drain site for the last four days.",
+      "id": "seed-r1",
+      "createdAt": "2026-10-06T08:20:00.000Z"
+    },
+    {
+      "category": "HAZARD",
+      "description": "Open trench with no barricade or lights at night near the bus stop.",
+      "id": "seed-r2",
+      "createdAt": "2026-10-08T19:45:00.000Z"
+    }
+  ],
+  "conflicts": []
+}

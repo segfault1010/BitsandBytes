@@ -1,0 +1,38 @@
+[
+  {
+    "id": "D-ROADS",
+    "name": "Roads Department (demo)",
+    "shortName": "Roads Dept",
+    "contactEmail": "roads@example.org"
+  },
+  {
+    "id": "D-WATER",
+    "name": "Water Board (demo)",
+    "shortName": "Water Board",
+    "contactEmail": "water@example.org"
+  },
+  {
+    "id": "D-POWER",
+    "name": "Power Utility (demo)",
+    "shortName": "Power Utility",
+    "contactEmail": "power@example.org"
+  },
+  {
+    "id": "D-TEL",
+    "name": "Telecom Utility (demo)",
+    "shortName": "Telecom",
+    "contactEmail": "telecom@example.org"
+  },
+  {
+    "id": "D-GAS",
+    "name": "Gas Utility (demo)",
+    "shortName": "Gas Utility",
+    "contactEmail": "gas@example.org"
+  },
+  {
+    "id": "D-DRAIN",
+    "name": "Storm-water Drains Department (demo)",
+    "shortName": "Storm-water Drains",
+    "contactEmail": "drains@example.org"
+  }
+]
