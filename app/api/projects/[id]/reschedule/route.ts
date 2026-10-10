@@ -14,6 +14,8 @@ export async function POST(request: Request, ctx: { params: Promise<{ id: string
     return apiError(409, "NOT_ACTIVE", "Finished or cancelled works cannot be rescheduled.");
   const change = validateReschedule(await readJson(request));
   if (!change.ok) return apiError(400, "INVALID_RESCHEDULE", change.message);
+  if (change.value.newStart === project.plannedStart && change.value.newEnd === project.plannedEnd)
+    return apiError(400, "UNCHANGED", "The new dates are the same as the current ones.");
 
   return guardWrite(async () => {
     const event = await appendEvent("DATES_CHANGED", id, {

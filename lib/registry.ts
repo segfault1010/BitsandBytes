@@ -50,7 +50,9 @@ export function projectSummaries(
     .filter((p) => !filters.status || p.status === filters.status)
     .map((p) => ({
       ...p,
-      conflictCount: conflictsFor(conflicts, p.id).filter(isOpenFlag).length,
+      conflictCount: conflictsFor(conflicts, p.id).filter(
+        (c) => isOpenFlag(c) && state.reviews[c.id]?.status !== "DISMISSED",
+      ).length,
       reportCount: state.events.filter((e) => e.type === "REPORT_ADDED" && e.projectId === p.id)
         .length,
       overdue: isOverdue(p, AS_OF),
